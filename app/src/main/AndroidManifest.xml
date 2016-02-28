@@ -12,8 +12,23 @@ package="sunshine.ambidextrous.com.sunshine">
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
     </activity>
-    <activity android:name="sunshine.ambidextrous.com.sunshine.DetailActivity" android:label="@string/title_activity_detail"
-        android:theme="@style/AppTheme.NoActionBar"></activity>
+    <activity android:name="sunshine.ambidextrous.com.sunshine.DetailActivity"
+        android:label="@string/title_activity_detail"
+        android:theme="@style/AppTheme.NoActionBar">
+        <meta-data
+            android:name="android.support.MainActivity"
+            android:value="MainActivity"
+        />
+    </activity>
+
+    <activity android:name="sunshine.ambidextrous.com.sunshine.SettingsActivity"
+        android:label="@string/title_activity_settings"
+        android:parentActivityName=".MainActivity">
+        <meta-data
+            android:name="android.support.MainActivity"
+            android:value="MainActivity"
+        />
+    </activity>
 </application>
 
 </manifest>

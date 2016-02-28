@@ -2,9 +2,11 @@ package sunshine.ambidextrous.com.sunshine;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,6 +50,12 @@ public class PlaceholderFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -69,37 +77,44 @@ public class PlaceholderFragment extends Fragment {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
-            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-            fetchWeatherTask.execute("94043");
+            updateWeather();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private void updateWeather() {
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = pref.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        fetchWeatherTask.execute(location);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container);
-
-        String[] forcastArray = {
-                "Today - Sunny - 88/63",
-                "Tommorow - Foggy - 70/40",
-                "Weds - Cloudy - 72/63",
-                "Thus - Aestroids - 75/65",
-                "Fri - Heavy Rain - 65/56",
-                "Sat - Trapped in Weather Station - 60/51",
-                "Sun - Sunny - 80/68"
-        };
-
-        List<String> weekForcast = new ArrayList<String>(
-                Arrays.asList(forcastArray));
+//
+//        String[] forcastArray = {
+//                "Today - Sunny - 88/63",
+//                "Tommorow - Foggy - 70/40",
+//                "Weds - Cloudy - 72/63",
+//                "Thus - Aestroids - 75/65",
+//                "Fri - Heavy Rain - 65/56",
+//                "Sat - Trapped in Weather Station - 60/51",
+//                "Sun - Sunny - 80/68"
+//        };
+//
+//        List<String> weekForcast = new ArrayList<String>(
+//                Arrays.asList(forcastArray));
 
         mForcastAdapter = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_forcast,
                 R.id.list_item_forcast_textview,
-                weekForcast
+                new ArrayList<String>()
         );
 
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forcast);
@@ -142,11 +157,25 @@ public class PlaceholderFragment extends Fragment {
          */
         private String formatHighLows(double high, double low) {
             // For presentation, assume the user doesn't care about tenths of a degree.
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String units = prefs.getString(getString(R.string.pref_units_key),
+                    getString(R.string.pref_units_metric));
+
+            if(units.equals(getString(R.string.pref_units_imperial))) {
+                high = (high * 1.8) + 32;
+                low = (low * 1.8) + 32;
+            } else if(! units.equals(getString(R.string.pref_units_metric))) {
+                Log.d(LOG_TAG, "Unit type not found: " + units);
+            }
+            // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
 
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
+
+
         }
 
 
